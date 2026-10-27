@@ -25,8 +25,12 @@ def track():
         print_version(track_version)
     
     elif command == "reg":
-        from workers.register import track_path
-        track_path(track_version)
+        from workers.register import register_project
+        register_project(track_version)
+        
+    elif command == "log":
+        from workers.log import log_project
+        log_project()
     
     else:
         cli = "track"
