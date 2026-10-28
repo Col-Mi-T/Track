@@ -25,6 +25,7 @@ def track():
         print_version(track_version)
     
     elif command == "reg":
+        
         from workers.register import register_project
         register_project(track_version)
         

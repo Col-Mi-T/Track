@@ -11,7 +11,7 @@ def register_project(track_version):
        print(f"\nThis path '{current}' is already registered and has a '.track' directory.\n")
        sys.exit()
      
-    print(f"Registered '{current}' for tracking.\n")
+    print(f"Registering '{current}' for tracking.\n")
     
     
     print("\nCreating '.track' directory in the current path...\n")
@@ -41,6 +41,7 @@ def register_project(track_version):
                 files.append(str(item))
             else:
                 scan_directory(item, files, ignore)
+                
     create_trackindex(track_path,files)
 
 def scan_directory(directory, files, ignore):
@@ -56,7 +57,7 @@ def scan_directory(directory, files, ignore):
             elif item.is_dir():
                 scan_directory(item, files, ignore)
     print("Done!\n")
-    print(f"Registered {len(files)} files in the current path:\n")
+    print(f"Obtained {len(files)} files in the current path:\n")
     for file in files:
        print(f"\t{file}")                    
 
@@ -88,12 +89,16 @@ def create_trackindex(track_path,files):
     
     index = 0
     for file in files:
+        print(f"Generating Hash for file: {file} ...")
+        import workers.hashing as hashing
+        hashdata=hashing.hash_file(file)
         d = {
             "path":file,
-            "index":index,
+            "id":index,
             "created":str(now),
             "last_updated":str(now),
             "file-size":str(Path(file).stat().st_size)+" bytes",
+            "hash":hashdata,
         }
         index+=1
         index_data["files"].append(d)
