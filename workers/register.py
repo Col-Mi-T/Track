@@ -1,6 +1,7 @@
 from pathlib import Path
 import json
 from datetime import datetime
+from workers.hashing import gen_id
 
 def register_project(track_version):
     from pathlib import Path
@@ -43,6 +44,18 @@ def register_project(track_version):
                 scan_directory(item, files, ignore)
                 
     create_trackindex(track_path,files)
+    
+    print("\nCreating File Content Storage...\n")
+    objects = track_path / "obj"
+    history = track_path/"history"
+    Path.mkdir(objects, exist_ok=True)
+    Path.mkdir(history, exist_ok=True)
+    from workers.file_data import file_to_bin
+    from workers.history import init_history
+    for i,file in enumerate(files):
+        file_to_bin(i,file,track_path)
+        init_history(i,file,track_path)
+        
 
 def scan_directory(directory, files, ignore):
     for item in directory.iterdir():
@@ -87,33 +100,22 @@ def create_trackindex(track_path,files):
         "files": []
     }
     
-    index = 0
     for file in files:
-        print(f"Generating Hash for file: {file} ...")
-        import workers.hashing as hashing
-        hashdata=hashing.hash_file(file)
+        #print(f"Generating Hash for file: {file} ...")
+        from workers.hashing import hash_file
+        hashdata=hash_file(file)
+        path = file
+        id = gen_id(path)
         d = {
             "path":file,
-            "id":index,
+            "id":id,
             "created":str(now),
             "last_updated":str(now),
-            "file-size":str(Path(file).stat().st_size)+" bytes",
+            "file_size":str(Path(file).stat().st_size)+" bytes",
             "hash":hashdata,
         }
-        index+=1
         index_data["files"].append(d)
     
     print("Writing Tracking Index to files...")
     with open(track_path/"index.json", "w") as index:
-        index.write(json.dumps(index_data, indent =4))
-    print("Done!\n")   
-
-def gen_id():
-    id = "TRK-"
-    import hashlib
-    import random
-    random_number = random.randint(1, 1000000)
-    hash_object = hashlib.sha256(str(random_number).encode())
-    year = datetime.now().year
-    id += str(year) + "-" + hash_object.hexdigest()[:8].upper()
-    return id
+        index.write(json.dumps(index_data, indent =4))   
