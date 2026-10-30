@@ -41,6 +41,7 @@ def track():
         from workers.log import log_project
         log_project()
     
+    
     else:
         cli = "track"
         for i in args:

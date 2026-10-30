@@ -8,9 +8,9 @@ def register_project(track_version):
     import sys
     current = Path.cwd()
     track_path = current / ".track"   
-    if Path.exists(track_path):
-       print(f"\nThis path '{current}' is already registered and has a '.track' directory.\n")
-       sys.exit()
+    #if Path.exists(track_path):
+     #  print(f"\nThis path '{current}' is already registered and has a '.track' directory.\n")
+      # sys.exit()
      
     print(f"Registering '{current}' for tracking.\n")
     
@@ -27,6 +27,8 @@ def register_project(track_version):
     if Path.exists(current/"not.track"):
         with open(current/"not.track", "r") as ignore_file:
             ignore = ignore_file.read().splitlines()
+    else:
+        ignore = []
     #print(ignore)
     
     for i,item in enumerate(items,start=1):
@@ -42,18 +44,19 @@ def register_project(track_version):
                 files.append(str(item))
             else:
                 scan_directory(item, files, ignore)
+    
+    print("Done!\n")
+    print(f"Obtained {len(files)} files in the current path:\n")
+    for file in files:
+        print(f"\t{file}") 
                 
     create_trackindex(track_path,files)
     
     print("\nCreating File Content Storage...\n")
-    objects = track_path / "obj"
     history = track_path/"history"
-    Path.mkdir(objects, exist_ok=True)
     Path.mkdir(history, exist_ok=True)
-    from workers.file_data import file_to_bin
     from workers.history import init_history
     for i,file in enumerate(files):
-        file_to_bin(i,file,track_path)
         init_history(i,file,track_path)
         
 
@@ -68,11 +71,7 @@ def scan_directory(directory, files, ignore):
                 files.append(str(item))
 
             elif item.is_dir():
-                scan_directory(item, files, ignore)
-    print("Done!\n")
-    print(f"Obtained {len(files)} files in the current path:\n")
-    for file in files:
-       print(f"\t{file}")                    
+                scan_directory(item, files, ignore)                   
 
 def create_trackconfig(track_path,track_version):
     project = track_path.parent.name
