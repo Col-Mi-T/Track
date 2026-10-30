@@ -29,8 +29,12 @@ def init_history(i,file,track_path):
         content = open_file.read() # read file
         with open(file_history/region["hash"], "w+") as origin:
             origin.write(content) #copy file to origin
-    
+            
+    with open(file_history/"PREVIOUS", "w+") as prev:
+        prev.write(content) #copy file to previous
    
+    with open(file_history/"ORIGIN","w+") as genesis:
+        genesis.write(region["hash"]) # write origin hash to file
     
     with open(file_history/region["id"],"w+") as history: # write init log
         original = region["hash"]

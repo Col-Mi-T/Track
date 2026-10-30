@@ -62,10 +62,11 @@ def log_project():
                 
     update_index(index,index_path)
     
-    
+    for file in index["files"]:
+        log_history(file,message)  
         
-
-
+        
+        
 def get_index(index_path):
     with open(index_path, "r+") as index:
         #print(index.read())
@@ -121,3 +122,26 @@ def append_index(i, index):
 def update_index(index,index_path):
     with open(index_path, "w+") as index_file:
         index_file.write(json.dumps(index,indent =4))
+        
+def log_history(file,message):
+    from datetime import datetime
+    from workers.compare import compare_changes
+    with open(Path.cwd()/f".track/history/{file["id"]}/ORIGIN","r+") as origin:
+        original = origin.read()
+    with open(Path.cwd()/f".track/history/{file["id"]}/{original}","r+") as ancestor:
+        initial = ancestor.read()
+    with open(Path.cwd()/f".track/history/{file["id"]}/PREVIOUS","r+") as prev:
+        previous = prev.read()
+    with open(file["path"],"r+") as current:
+        present = current.read()
+    
+    changes = compare_changes(previous,present)
+    
+    if changes == False:
+        pass
+    else:
+        print(changes)
+    
+    with open(Path.cwd()/f".track/history/{file["id"]}/PREVIOUS","w") as prev:
+        prev.write(present)
+    
