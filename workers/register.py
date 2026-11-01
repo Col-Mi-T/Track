@@ -6,7 +6,13 @@ from workers.hashing import gen_id
 def register_project(track_version):
     from pathlib import Path
     import sys
+    import os
     current = Path.cwd()
+    print("Current directory:", Path.cwd())
+    print("Can write here:", os.access(Path.cwd(), os.W_OK))
+    if not os.access(current, os.W_OK):
+        print(f"Error: No write permission in '{current}'")
+        sys.exit(1)
     track_path = current / ".track"   
     if Path.exists(track_path):
        print(f"\nThis path '{current}' is already registered and has a '.track' directory.\n")
