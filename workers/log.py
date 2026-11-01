@@ -1,6 +1,7 @@
 from pathlib import Path
 import json
 
+
 def log_project():
     # equivalent to git commit -m "message"#
     from datetime import datetime
@@ -26,9 +27,13 @@ def log_project():
             track_path = Path.cwd()/".track"
             i = len(new)-1
             init_history(i,file,track_path)
-            
+    
+    prev_hashes = {}
     for file in index["files"]:
         f = Path(file["path"])
+        previous_hash = file["hash"]
+        hash_file_id = file["id"]
+        prev_hashes[hash_file_id] = previous_hash
         if not Path.exists(f):
             import shutil
             file_id = file["id"]
@@ -63,7 +68,7 @@ def log_project():
     update_index(index,index_path)
     
     for file in index["files"]:
-        log_history(file,message)  
+        log_history(file,message,prev_hashes)  
         
         
         
@@ -123,7 +128,8 @@ def update_index(index,index_path):
     with open(index_path, "w+") as index_file:
         index_file.write(json.dumps(index,indent =4))
         
-def log_history(file,message):
+def log_history(file,message,prev_hashes):
+    prev_hash = prev_hashes[file["id"]]
     from datetime import datetime
     from workers.compare import compare_changes
     with open(Path.cwd()/f".track/history/{file["id"]}/ORIGIN","r+") as origin:
@@ -140,7 +146,31 @@ def log_history(file,message):
     if changes == False:
         pass
     else:
-        print(changes)
+        changes =  list(changes)
+        print("\n".join(changes))
+        with open(Path.cwd()/f".track/history/{file["id"]}/LASTLOGID","r") as log_id:
+            prev_id = log_id.read()
+        with open(Path.cwd()/f".track/history/{file["id"]}/LASTLOGID","w") as log_id:
+            new_id = int(prev_id)+1
+            log_id.write(str(new_id))
+            
+        with open(Path.cwd()/f".track/history/{file["id"]}/{file["id"]}","r+") as history:
+            log = f"LOG ID = {new_id}"
+            log_message = f"\n\tMessage = {message}"
+            time = f"\n\tTime = {datetime.now()}"
+            c_hash = f"\n\tCurrent Hash = {file["hash"]}"
+            p_hash = f"\n\tPrevious Hash = {prev_hash}"
+            ch = "\n\t\t".join(changes)
+            change = f"\n\tChanges =\n\t\t{ch}"
+            update_log = f"{log}{log_message}{time}{c_hash}{p_hash}{change}\n\n{'-'*100}\n"
+            content = []
+            content.append(update_log)
+            content.append("\n")
+            content.append(history.read())
+            history.seek(0)
+            history.truncate()
+            history.write("".join(content))
+    
     
     with open(Path.cwd()/f".track/history/{file["id"]}/PREVIOUS","w") as prev:
         prev.write(present)

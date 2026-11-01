@@ -47,7 +47,8 @@ def init_history(i,file,track_path):
         init_log = f"{log}{message}{time}{c_hash}{p_hash}{changes}\n\nORIGIN = {original}"
         history.write(init_log)
         
-    
+    with open(file_history/"LASTLOGID", "w+") as log_id:
+        log_id.write("1")
     
     with open(file_history/region["id"], "r+") as history:
         content = []

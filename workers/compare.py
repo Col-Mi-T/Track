@@ -5,11 +5,15 @@ def check_hash(hash,files):
             return True
     return False
 
-def compare_changes(initial,present):
-    if initial!=present:
-        print("CHANGES !")
+def compare_changes(previous,present):
+    if previous!=present:
         
+        import difflib
         
-        
+        prev = previous.splitlines()
+        pres = present.splitlines()
+        diff = difflib.unified_diff(prev, pres)
+        return diff
+    
     else:
         return False
