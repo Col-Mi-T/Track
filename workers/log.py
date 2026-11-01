@@ -142,8 +142,9 @@ def log_history(file,message,prev_hashes):
         present = current.read()
     
     changes = compare_changes(previous,present)
-    
+    print(f"\n{file["path"]}:")
     if changes == False:
+        print("No Changes Detected. Edit/save file and retry.\n")
         pass
     else:
         changes =  list(changes)

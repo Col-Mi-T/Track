@@ -8,9 +8,10 @@ def register_project(track_version):
     import sys
     current = Path.cwd()
     track_path = current / ".track"   
-    #if Path.exists(track_path):
-     #  print(f"\nThis path '{current}' is already registered and has a '.track' directory.\n")
-      # sys.exit()
+    if Path.exists(track_path):
+       print(f"\nThis path '{current}' is already registered and has a '.track' directory.\n")
+       print("Use 'track log' to write a log.")
+       sys.exit()
      
     print(f"Registering '{current}' for tracking.\n")
     
@@ -58,6 +59,7 @@ def register_project(track_version):
     from workers.history import init_history
     for i,file in enumerate(files):
         init_history(i,file,track_path)
+    print("Done!")
         
 
 def scan_directory(directory, files, ignore):

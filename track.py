@@ -20,7 +20,7 @@ def track():
         from workers.info import print_help
         print_help()
         
-    elif command == "version" or command == "-v":
+    elif command == "--version" or command == "-v":
         from workers.info import print_version
         print_version(track_version)
     
