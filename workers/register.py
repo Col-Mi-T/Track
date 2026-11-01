@@ -43,7 +43,7 @@ def register_project(track_version):
         
         print(f"\r[{percent}%]", end=" ", flush=True)
 
-        if item.name in [".git", ".track", "not.track"] or item.name in ignore:
+        if item.name in [".git", ".track", "not.track"] or item.name in ignore or item.resolve() == Path(sys.executable).resolve():
             #print(f"Skipping '{item}'...", end=" ", flush=True)
             continue
         else:
@@ -69,8 +69,9 @@ def register_project(track_version):
         
 
 def scan_directory(directory, files, ignore):
+    import sys
     for item in directory.iterdir():
-        if item.name in [".git", ".track", "not.track"] or item.name in ignore:
+        if item.name in [".git", ".track", "not.track"] or item.name in ignore or item.resolve() == Path(sys.executable).resolve():
             #print(f"Skipping {item}...", end=" ", flush=True)
             continue
         else:

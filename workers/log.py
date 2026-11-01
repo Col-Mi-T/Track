@@ -1,5 +1,6 @@
 from pathlib import Path
 import json
+import sys
 
 
 def log_project():
@@ -93,7 +94,7 @@ def scan_dir():
     else:
         ignore = []
     for item in items:
-        if item.name in [".git", ".track", "not.track"] or item.name in ignore:
+        if item.name in [".git", ".track", "not.track"] or item.name in ignore or item.resolve() == Path(sys.executable).resolve():
             #print(f"Skipping '{item}'...", end=" ", flush=True)
             continue
         else:
