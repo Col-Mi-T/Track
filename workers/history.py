@@ -50,12 +50,5 @@ def init_history(i,file,track_path):
     with open(file_history/"LASTLOGID", "w+") as log_id:
         log_id.write("1")
     
-    with open(file_history/region["id"], "r+") as history:
-        content = []
-        content.append("hello")
-        content.append("\n")
-        content.append(history.read())
-        history.seek(0)
-        history.truncate()
-        history.write("".join(content))
+    
     #print(original, "ORIGIN")
