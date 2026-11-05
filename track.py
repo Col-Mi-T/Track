@@ -7,8 +7,9 @@ def track():
     args = sys.argv[1:]
     
     if len(args)<1:
-        from workers.info import print_help
+        from workers.info import print_help,options
         print_help()
+        options()
         sys.exit(0)
         
     command = args[0]
@@ -52,9 +53,10 @@ def track():
         for i in args:
             cli += " " + i
         print("Unknown command: " + cli)
-        from workers.info import print_help
+        from workers.info import print_help,options
         print_help()
-        sys.exit(1)
+        options()
+        sys.exit(0)
         
 
 if __name__ == "__main__":
