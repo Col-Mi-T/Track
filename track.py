@@ -25,9 +25,10 @@ def track():
         print_version(track_version)
     
     elif command == "reg":
-        try:
+        #try:
             from workers.register import register_project
             register_project(track_version)
+            """
         except Exception as e:
             print("Unexpected Error:",e,"\n")
             import shutil
@@ -36,11 +37,15 @@ def track():
             if Path.exists(trackpath):
                 shutil.rmtree(trackpath)
             sys.exit(1)
+        """
         
     elif command == "log":
         from workers.log import log_project
         log_project()
     
+    elif command == "museum":
+        from workers.museum import project_museum
+        project_museum()
     
     else:
         cli = "track"

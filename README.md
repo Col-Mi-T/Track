@@ -108,5 +108,6 @@ Track currently uses Python's standard library for its core functionality, inclu
 - `difflib`
 - `sys`
 - `shutil`
+- `pickle`
 
 No third-party Python packages are currently required.

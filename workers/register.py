@@ -50,7 +50,17 @@ def register_project(track_version):
             if item.is_file():
                 files.append(str(item))
             else:
-                scan_directory(item, files, ignore)
+                relative_path = item.relative_to(current).as_posix()
+                relative_path = item.relative_to(current).as_posix()
+
+                if any(
+                    relative_path == path.rstrip("/")
+                    or relative_path.startswith(path.rstrip("/") + "/")
+                    for path in ignore
+                ):
+                    continue
+                
+                scan_directory(item, files, ignore,relative_path)
     
     print("Done!\n")
     print(f"Obtained {len(files)} files in the current path:\n")
@@ -62,16 +72,21 @@ def register_project(track_version):
     print("\nCreating File Content Storage...\n")
     history = track_path/"history"
     Path.mkdir(history, exist_ok=True)
-    from workers.history import init_history
+    from workers.history import init_history, create_delta_home
     for i,file in enumerate(files):
         init_history(i,file,track_path)
+        create_delta_home(i,track_path)
     print("Done!")
         
 
-def scan_directory(directory, files, ignore):
+def scan_directory(directory, files, ignore,relative_path):
     import sys
+    
     for item in directory.iterdir():
-        if item.name in [".git", ".track", "not.track"] or item.name in ignore or item.resolve() == Path(sys.executable).resolve():
+        if (item.name in [".git", ".track", "not.track"] 
+            or item.name in ignore
+            or relative_path in ignore
+            or item.resolve() == Path(sys.executable).resolve()):
             #print(f"Skipping {item}...", end=" ", flush=True)
             continue
         else:
@@ -80,7 +95,7 @@ def scan_directory(directory, files, ignore):
                 files.append(str(item))
 
             elif item.is_dir():
-                scan_directory(item, files, ignore)                   
+                scan_directory(item, files, ignore,relative_path)                   
 
 def create_trackconfig(track_path,track_version):
     project = track_path.parent.name

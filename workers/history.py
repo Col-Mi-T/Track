@@ -3,6 +3,7 @@ def init_history(i,file,track_path):
     from pathlib import Path
     import json
     from datetime import datetime
+    #print(file)
     
     with open(track_path/"index.json") as indexfile:
         json_index = indexfile.read()
@@ -17,6 +18,7 @@ def init_history(i,file,track_path):
     """
     Format:
     Commit timestamp
+    
     commit message
     previous datahash
     current datahash
@@ -27,7 +29,7 @@ def init_history(i,file,track_path):
     
     with open(file,"r+") as open_file:
         content = open_file.read() # read file
-        with open(file_history/region["hash"], "w+") as origin:
+        with open(f"{file_history/region["hash"]}.tx", "w+") as origin:
             origin.write(content) #copy file to origin
             
     with open(file_history/"PREVIOUS", "w+") as prev:
@@ -36,7 +38,7 @@ def init_history(i,file,track_path):
     with open(file_history/"ORIGIN","w+") as genesis:
         genesis.write(region["hash"]) # write origin hash to file
     
-    with open(file_history/region["id"],"w+") as history: # write init log
+    with open(f"{file_history/region["id"]}.tr","w+") as history: # write init log
         original = region["hash"]
         log = f"LOG ID = 1"
         message = "\n\tMessage = Register File"
@@ -48,7 +50,20 @@ def init_history(i,file,track_path):
         history.write(init_log)
         
     with open(file_history/"LASTLOGID", "w+") as log_id:
-        log_id.write("1")
+        log_id.write("0")
     
     
     #print(original, "ORIGIN")
+    
+def create_delta_home(i,track_path):
+    from pathlib import Path
+    import json
+    #print(file)
+    with open(track_path/"index.json") as indexfile:
+        json_index = indexfile.read()
+        
+        index = json.loads(json_index)
+        region = index["files"][i]
+    
+    file_id = region["id"]
+    Path.mkdir(Path.cwd()/f".track/history/{file_id}/deltas", exist_ok =True)

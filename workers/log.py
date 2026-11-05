@@ -69,6 +69,7 @@ def log_project():
     update_index(index,index_path)
     
     for file in index["files"]:
+        #print(file)
         log_history(file,message,prev_hashes)  
         
         
@@ -93,15 +94,25 @@ def scan_dir():
             ignore = ignorefile.read().splitlines()
     else:
         ignore = []
+        
     for item in items:
-        if item.name in [".git", ".track", "not.track"] or item.name in ignore or item.resolve() == Path(sys.executable).resolve():
-            #print(f"Skipping '{item}'...", end=" ", flush=True)
+        relative_path = item.relative_to(current).as_posix()
+        if any(
+            relative_path == path.rstrip("/")
+            or relative_path.startswith(path.rstrip("/") + "/")
+            for path in ignore
+        ):
+            continue
+        if (item.name in [".git", ".track", "not.track"] 
+            or item.name in ignore
+            or relative_path in ignore 
+            or item.resolve() == Path(sys.executable).resolve()):
             continue
         else:
             if item.is_file():
                 files.append(str(item))
             else:
-                scan_directory(item, files, ignore)
+                scan_directory(item, files, ignore,relative_path)
     return files
     
 def append_index(i, index):
@@ -135,7 +146,7 @@ def log_history(file,message,prev_hashes):
     from workers.compare import compare_changes
     with open(Path.cwd()/f".track/history/{file["id"]}/ORIGIN","r+") as origin:
         original = origin.read()
-    with open(Path.cwd()/f".track/history/{file["id"]}/{original}","r+") as ancestor:
+    with open(Path.cwd()/f".track/history/{file["id"]}/{original}.tx","r+") as ancestor:
         initial = ancestor.read()
     with open(Path.cwd()/f".track/history/{file["id"]}/PREVIOUS","r+") as prev:
         previous = prev.read()
@@ -144,8 +155,10 @@ def log_history(file,message,prev_hashes):
     
     changes = compare_changes(previous,present)
     print(f"\n{file["path"]}:")
+    
     if changes == False:
         print("No Changes Detected. Edit/save file and retry.\n")
+        
         pass
     else:
         changes =  list(changes)
@@ -156,7 +169,7 @@ def log_history(file,message,prev_hashes):
             new_id = int(prev_id)+1
             log_id.write(str(new_id))
             
-        with open(Path.cwd()/f".track/history/{file["id"]}/{file["id"]}","r+") as history:
+        with open(Path.cwd()/f".track/history/{file["id"]}/{file["id"]}.tr","r+") as history:
             log = f"LOG ID = {new_id}"
             log_message = f"\n\tMessage = {message}"
             time = f"\n\tTime = {datetime.now()}"
@@ -167,13 +180,20 @@ def log_history(file,message,prev_hashes):
             update_log = f"{log}{log_message}{time}{c_hash}{p_hash}{change}\n\n{'-'*100}\n"
             content = []
             content.append(update_log)
+            
             content.append("\n")
             content.append(history.read())
             history.seek(0)
             history.truncate()
             history.write("".join(content))
     
-    
-    with open(Path.cwd()/f".track/history/{file["id"]}/PREVIOUS","w") as prev:
-        prev.write(present)
-    
+            
+            with open(Path.cwd()/f".track/history/{file["id"]}/PREVIOUS","w") as prev:
+                prev.write(present)
+            with open(Path.cwd()/f".track/history/{file["id"]}/LASTLOGID","r") as log_ids:
+                    log_id = log_ids.read()
+            with open(Path.cwd()/f".track/history/{file["id"]}/deltas/delta{log_id}","wb+") as written_delta:
+                from workers.compare import structured_changes
+                import pickle
+                delta_data = structured_changes(previous,present)
+                pickle.dump(delta_data, written_delta)

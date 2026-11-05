@@ -17,3 +17,27 @@ def compare_changes(previous,present):
     
     else:
         return False
+
+def structured_changes(previous, present):
+    import difflib
+
+    old = previous.splitlines(keepends=True)
+    new = present.splitlines(keepends=True)
+
+    matcher = difflib.SequenceMatcher(None, old, new)
+
+    delta = []
+
+    for tag, i1, i2, j1, j2 in matcher.get_opcodes():
+        if tag == "equal":
+            continue
+
+        delta.append({
+            "operation": tag,
+            "old_position": i1,
+            "new_position": j1,
+            "removed": old[i1:i2],
+            "added": new[j1:j2]
+        })
+
+    return delta if delta else False
