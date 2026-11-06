@@ -16,6 +16,7 @@ def track():
     second_arg = None if not len(args)>1 else args[1]
     third_arg = None if not len(args)>2 else args[2]
     forth_arg = None if not len(args)>3 else args[3]
+    fifth_arg = None if not len(args)>4 else args[4]
         
     if command == "--help" or command == "-h":
         from workers.info import print_help
@@ -47,7 +48,10 @@ def track():
     elif command == "restore":
         from workers.restore import restore_files
         #print(second_arg,third_arg)
-        restore_files(second_arg,third_arg,forth_arg)
+        if forth_arg and forth_arg not in ("-r", "--restore"):
+            forth_arg = None
+        print(second_arg,third_arg,forth_arg,fifth_arg)
+        restore_files(second_arg,third_arg,forth_arg,fifth_arg)
     
     elif command == "files":
         from workers.tracked import tracked_files

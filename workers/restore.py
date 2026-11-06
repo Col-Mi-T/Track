@@ -3,7 +3,7 @@ import sys
 import pickle
 """Reconstruction"""
 
-def restore_files(second_arg=None,third_arg=None,forth_arg=None):
+def restore_files(second_arg=None,third_arg=None,forth_arg=None, fifth_arg=None):
     import json
     from pathlib import Path
     dir = Path.cwd()
@@ -23,14 +23,14 @@ def restore_files(second_arg=None,third_arg=None,forth_arg=None):
         file_history = dir/".track/history"/file_id
         delta = forth_arg
         
-        if delta == None:
+        if forth_arg == None:
             with open(file_history/"LASTLOGID", "r") as log_id:
                 last_log_id = log_id.read()
             delta = f"delta{last_log_id}"
         
-        if str(last_log_id) == "0":
-            print("This is the original version of the file, no changes have been made yet.")
-            sys.exit(0)
+            if str(last_log_id) == "0":
+                print("This is the original version of the file, no changes have been made yet.")
+                sys.exit(0)
             
         with open(file_history/f"deltas/{delta}", "rb") as delta_file:
             delta_content = pickle.load(delta_file)
