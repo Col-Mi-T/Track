@@ -44,10 +44,14 @@ def track():
         from workers.log import log_project
         log_project()
     
-    elif command == "museum":
-        from workers.museum import project_museum
-        project_museum()
+    elif command == "restore":
+        from workers.restore import restore_files
+        #print(second_arg,third_arg)
+        restore_files(second_arg,third_arg,forth_arg)
     
+    elif command == "files":
+        from workers.tracked import tracked_files
+        tracked_files()
     else:
         cli = "track"
         for i in args:

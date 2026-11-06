@@ -48,7 +48,7 @@ def options():
         from workers.log import log_project
         log_project()
     elif choice.lower() == "restore a file version":
-        from workers.museum import project_museum
+        from workers.restore import project_museum
         project_museum()
     elif choice.lower()=="exit":
         sys.exit(0)

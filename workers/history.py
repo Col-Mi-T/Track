@@ -3,10 +3,11 @@ def init_history(i,file,track_path):
     from pathlib import Path
     import json
     from datetime import datetime
-    #print(file)
+    print(file)
     
     with open(track_path/"index.json") as indexfile:
         json_index = indexfile.read()
+    
     
     index = json.loads(json_index)
     region = index["files"][i]

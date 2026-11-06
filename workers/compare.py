@@ -1,22 +1,27 @@
 
-def check_hash(hash,files):
+def check_hash(hash, files):
+    from workers.hashing import hash_file
+
     for file in files:
-        if file["hash"] == hash:
-            return True
+        if hash_file(file) == hash:
+            return file
+
     return False
 
-def compare_changes(previous,present):
-    if previous!=present:
-        
+
+def compare_changes(previous, present):
+    if previous != present:
         import difflib
-        
+
         prev = previous.splitlines()
         pres = present.splitlines()
         diff = difflib.unified_diff(prev, pres)
+
         return diff
-    
+
     else:
         return False
+
 
 def structured_changes(previous, present):
     import difflib

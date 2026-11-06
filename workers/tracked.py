@@ -1,7 +1,4 @@
-
-"""Reconstruction"""
-
-def project_museum():
+def tracked_files():
     import json
     from pathlib import Path
     dir = Path.cwd()
@@ -19,20 +16,3 @@ def project_museum():
         print(f"Last Updated: {file['last_updated']}")
         print(f"File Size: {file['file_size']}")
         print(f"Hash: {file['hash']}")
-       
-    """ 
-    import questionary
-
-    choice = questionary.select(
-        "What would you like to do?",
-        choices=[
-            "Register project",
-            "Create log",
-            "View history",
-            "Restore version",
-            "Exit"
-        ]
-    ).ask()
-
-    print(f"You selected: {choice}")
-    """
