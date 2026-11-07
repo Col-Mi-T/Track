@@ -1,3 +1,4 @@
+
 from pathlib import Path
 import sys
 import pickle
@@ -5,76 +6,96 @@ import pickle
 
 def restore_files(second_arg=None,third_arg=None,forth_arg=None, fifth_arg=None):
     import json
-    from pathlib import Path
     dir = Path.cwd()
-    
+
+    if fifth_arg != None:
+        fifth_arg = int(fifth_arg)
+
     with open(dir/".track/index.json", "r") as index:
         index_data = json.load(index)
     files = index_data["files"]
-    
+
     if second_arg == "-f" and third_arg != None:
         file = third_arg
         indexed_file = find_file(file, files)
+
         if indexed_file == False:
             print("File not found in the folder, check the file path, use a relative path if the file is in the current working directory or a subdirectory.")
             sys.exit(1)
-        #print(indexed_file)
+
         file_id = indexed_file["id"]
         file_history = dir/".track/history"/file_id
-        delta = forth_arg
-        
+
+        with open(file_history/"LASTLOGID", "r") as log_id:
+            last_log_id = int(log_id.read())
+
         if forth_arg == None:
-            with open(file_history/"LASTLOGID", "r") as log_id:
-                last_log_id = log_id.read()
-            delta = f"delta{last_log_id}"
-        
-            if str(last_log_id) == "0":
+            if last_log_id == 0:
                 print("This is the original version of the file, no changes have been made yet.")
                 sys.exit(0)
-            
-        with open(file_history/f"deltas/{delta}", "rb") as delta_file:
-            delta_content = pickle.load(delta_file)
-            #print(delta_content)
-        
-        with open(file_history/f"ORIGIN", "r") as origin:
-            origin_hash = origin.read()
-        with open(file_history/f"{origin_hash}.tx", "r") as origin_file:
-            origin_content = origin_file.read()
-        #print(origin_content)
-        
-        if forth_arg == None:
-            with open(indexed_file["path"], "r") as file_to_restore:
-                current_file = file_to_restore.read()
-                current_lines = current_file.splitlines(keepends=True)
-                print("".join(current_lines))
-                print("-"*50)
-            
-        for d in delta_content:
-            operation = d["operation"]
-            old_pos = d["old_position"]
-            new_pos = d["new_position"]
-            removed = d["removed"]
-            added = d["added"]
-            print(operation,old_pos,new_pos,removed,added)
-            print("-"*50)
-            #original_lines = origin_content.splitlines(keepends=True)
-            
-            if forth_arg == None:                
-            #    if operation == "insert":
-             #       del current_lines[new_pos:new_pos + len(added)]
-              #  elif operation == "delete":
-               #      current_lines[new_pos:new_pos] = removed
-                #elif operation == "replace":
-                 #   current_lines[new_pos:new_pos + len(added)] = removed
-                 with open(dir/f".track/history/{file_id}/PREVIOUS", "r") as prev_file:
-                    current_lines = prev_file.read()
-        with open("bob","w+") as bob:
-            bob.write("".join(current_lines))
+
+            with open(file_history/"PREVIOUS", "r") as prev_file:
+                current_content = prev_file.read()
+
+        else:
+            if fifth_arg == None:
+                fifth_arg = last_log_id
+
+            if fifth_arg > last_log_id or fifth_arg < 1:
+                print(f"Invalid log ID. The last log ID for this file is {last_log_id}.")
+                sys.exit(1)
+
+            with open(file_history/"ORIGIN", "r") as origin:
+                origin_hash = origin.read()
+
+            with open(file_history/f"{origin_hash}.tx", "r") as origin_file:
+                origin_content = origin_file.read()
+                current_lines = origin_content.splitlines(keepends=True)
+
+            current_delta = 1
+
+            while current_delta <= fifth_arg:
+                print(current_delta)
+                delta = f"delta{current_delta}"
+
+                with open(file_history/f"deltas/{delta}", "rb") as delta_file:
+                    delta_content = pickle.load(delta_file)
+
+                new_lines = []
+                position = 0
+
+                for d in delta_content:
+                    operation = d["operation"]
+                    old_pos = d["old_position"]
+                    new_pos = d["new_position"]
+                    removed = d["removed"]
+                    added = d["added"]
+
+                    print(f"Operation: {operation}\n Old Position: {old_pos}\n New Position: {new_pos}\n Removed: {removed}\n Added: {added}")
+
+                    # Copy unchanged lines
+                    new_lines.extend(current_lines[position:old_pos])
+
+                    # Add the new lines
+                    new_lines.extend(added)
+
+                    # Move past the removed lines
+                    position = old_pos + len(removed)
+
+                # Copy whatever remains
+                new_lines.extend(current_lines[position:])
+
+                current_lines = new_lines
+                current_delta += 1
+
+            current_content = "".join(current_lines)
+
+        with open("bob", "w+") as bob:
+            bob.write(current_content)
 
 
 def find_file(file_path, files):
     root = Path.cwd()
-
     path = Path(file_path)
 
     if path.is_absolute():
@@ -94,21 +115,3 @@ def find_file(file_path, files):
             return file
 
     return False
-    
-       
-    """ 
-    import questionary
-
-    choice = questionary.select(
-        "What would you like to do?",
-        choices=[
-            "Register project",
-            "Create log",
-            "View history",
-            "Restore version",
-            "Exit"
-        ]
-    ).ask()
-
-    print(f"You selected: {choice}")
-    """
