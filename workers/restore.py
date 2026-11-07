@@ -4,12 +4,21 @@ import sys
 import pickle
 """Reconstruction"""
 
-def restore_files(second_arg=None,third_arg=None,forth_arg=None, fifth_arg=None):
+def restore_files(second_arg=None,third_arg=None,forth_arg=None, fifth_arg=None,sixth_arg=None,seventh_arg=None):
     import json
     dir = Path.cwd()
 
+    if sixth_arg and seventh_arg:
+        restored = seventh_arg #Path(seventh_arg).relative_to(dir)
+    else:
+        restored = Path(third_arg)
+    
     if fifth_arg != None:
-        fifth_arg = int(fifth_arg)
+        try:
+            fifth_arg = int(fifth_arg)
+        except ValueError:
+            print("Invalid log ID. Please provide a valid integer.")
+            sys.exit(1)
 
     with open(dir/".track/index.json", "r") as index:
         index_data = json.load(index)
@@ -90,8 +99,8 @@ def restore_files(second_arg=None,third_arg=None,forth_arg=None, fifth_arg=None)
 
             current_content = "".join(current_lines)
 
-        with open("bob", "w+") as bob:
-            bob.write(current_content)
+        with open(restored, "w+") as restored_file:
+            restored_file.write(current_content)
 
 
 def find_file(file_path, files):
