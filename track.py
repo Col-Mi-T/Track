@@ -2,7 +2,8 @@ import sys
 import colors
 sys.dont_write_bytecode = True
 
-track_version = "1.1.0"
+track_version="1.1.0"
+
 
 def track():
     args = sys.argv[1:]
