@@ -1,6 +1,9 @@
 from pathlib import Path
 import json
 from datetime import datetime
+import colors
+import sys
+sys.dont_write_bytecode = True
 from workers.hashing import gen_id
 
 def register_project(track_version):
@@ -8,21 +11,21 @@ def register_project(track_version):
     import sys
     import os
     current = Path.cwd()
-    print("Current directory:", Path.cwd())
-    print("Can write here:", os.access(Path.cwd(), os.W_OK))
+    print("\nCurrent directory:", Path.cwd())
+    #print("Can write here:", os.access(Path.cwd(), os.W_OK))
     if not os.access(current, os.W_OK):
-        print(f"Error: No write permission in '{current}'")
+        print(f"{colors.RED}Error: No write permission in '{current}'{colors.RESET}")
         sys.exit(1)
     track_path = current / ".track"   
     if Path.exists(track_path):
-       print(f"\nThis path '{current}' is already registered and has a '.track' directory.\n")
-       print("Use 'track log' to write a log.")
-       sys.exit()
+       print(f"\n{colors.BLUE}This path '{current}' is already registered and has a '.track' directory.\n")
+       print(f"Use 'track log' to write a log.{colors.RESET}")
+       sys.exit(0)
      
-    print(f"Registering '{current}' for tracking.\n")
+    print(f"\nRegistering '{current}' for tracking.\n")
     
     
-    print("\nCreating '.track' directory in the current path...\n")
+    print(f"Creating '.track' directory in the current path...\n")
     Path.mkdir(track_path, exist_ok=True)
     create_trackconfig(track_path,track_version)
     
@@ -41,9 +44,9 @@ def register_project(track_version):
     for i,item in enumerate(items,start=1):
         percent = int(i/total*100) if total else 100
         
-        print(f"\r[{percent}%]", end=" ", flush=True)
+        print(f"{colors.GREEN}\r[{percent}%]{colors.RESET}", end=" ", flush=True)
 
-        if item.name in [".git", ".track", "not.track"] or item.name in ignore or item.resolve() == Path(sys.executable).resolve():
+        if item.name in [".git", ".track", "not.track", "__pycache__"] or item.name in ignore or item.resolve() == Path(sys.executable).resolve():
             #print(f"Skipping '{item}'...", end=" ", flush=True)
             continue
         else:
@@ -62,21 +65,21 @@ def register_project(track_version):
                 
                 scan_directory(item, files, ignore,relative_path)
     
-    print("Done!\n")
+    print(f"{colors.GREEN}Done!{colors.RESET}\n")
     print(f"Obtained {len(files)} files in the current path:\n")
     for file in files:
         print(f"\t{file}") 
                 
     create_trackindex(track_path,files)
     
-    print("\nCreating File Content Storage...\n")
+    print(f"\nCreating File Content Storage...\n")
     history = track_path/"history"
     Path.mkdir(history, exist_ok=True)
     from workers.history import init_history, create_delta_home
     for i,file in enumerate(files):
         init_history(i,file,track_path)
         create_delta_home(i,track_path)
-    print("Done!")
+    print(f"{colors.GREEN}Done!{colors.RESET}")
         
 
 def scan_directory(directory, files, ignore,relative_path):
@@ -102,7 +105,7 @@ def create_trackconfig(track_path,track_version):
     length = int(len(str(track_path))/4)
     id = gen_id()
     
-    print("Generating Configuration Data...")
+    print(f"Generating Configuration Data...")
     now = datetime.now()
     
     config_data = {
@@ -112,7 +115,7 @@ def create_trackconfig(track_path,track_version):
         "created": str(now),
         "ignorefile" : "not.track",
     }
-    print("Writing Configuration Data to file...")
+    print(f"Writing Configuration Data to file...")
     with open(track_path/"config.json", "w") as index:
         index.write(json.dumps(config_data, indent =4))
     
@@ -139,6 +142,6 @@ def create_trackindex(track_path,files):
         }
         index_data["files"].append(d)
     
-    print("Writing Tracking Index to files...")
+    print(f"Writing Tracking Index to files...")
     with open(track_path/"index.json", "w") as index:
         index.write(json.dumps(index_data, indent =4))   

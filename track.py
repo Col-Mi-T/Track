@@ -1,4 +1,5 @@
 import sys
+import colors
 sys.dont_write_bytecode = True
 
 track_version = "1.1.0"
@@ -29,25 +30,25 @@ def track():
         print_version(track_version)
     
     elif command == "reg":
-        try:
+        #try:
             from workers.register import register_project
             register_project(track_version)
             sys.exit(0)
-        except Exception as e:
-            print("Unexpected Error:",e,"\n")
-            import shutil
-            from pathlib import Path
-            trackpath=Path.cwd() / ".track"
-            if Path.exists(trackpath):
-                shutil.rmtree(trackpath)
-            sys.exit(1)
+        #except Exception as e:
+         #   print(f"{colors.RED}Unexpected Error:",e,"\n{colors.RESET}")
+          #  import shutil
+           # from pathlib import Path
+            #trackpath=Path.cwd() / ".track"
+            #if Path.exists(trackpath):
+             #   shutil.rmtree(trackpath)
+            #sys.exit(1)
         
         
     from pathlib import Path
     track_path = Path.cwd() / ".track"
     registered = Path.exists(track_path)
     if not registered:
-        print("Project not registered. Please register the project first using 'track reg'.")
+        print(f"{colors.RED}Project not registered. Please register the project first using 'track reg'.{colors.RESET}")
         sys.exit(1)
         
     elif command == "log":
@@ -58,10 +59,10 @@ def track():
         from workers.restore import restore_files
         #print(second_arg,third_arg)
         if forth_arg and forth_arg not in ("-i", "--id"):
-            print("Invalid option. Use -i or --id to specify a log ID.")
+            print(f"{colors.RED}Invalid option. Use -i or --id to specify a log ID.{colors.RESET}")
             sys.exit(1)
         if sixth_arg and sixth_arg not in ("-r", "--restored"):
-            print("Invalid option. Use -r or --restored")
+            print(f"{colors.RED}Invalid option. Use -r or --restored to a file to restore{colors.RESET}")
             sys.exit(1)
         #print(second_arg,third_arg,forth_arg,fifth_arg)
         restore_files(second_arg,third_arg,forth_arg,fifth_arg,sixth_arg,seventh_arg)
@@ -69,11 +70,16 @@ def track():
     elif command == "files":
         from workers.tracked import tracked_files
         tracked_files()
+    
+    elif command == "history":
+        from workers.history import file_history
+        file_history(second_arg,third_arg)
+    
     else:
         cli = "track"
         for i in args:
             cli += " " + i
-        print("Unknown command: " + cli)
+        print(f"{colors.RED}Unknown command: " + cli,colors.RESET)
         from workers.info import print_help,options
         print_help()
         options()

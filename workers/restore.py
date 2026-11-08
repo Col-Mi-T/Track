@@ -1,4 +1,6 @@
-
+import colors
+import sys
+sys.dont_write_bytecode = True
 from pathlib import Path
 import sys
 import pickle
@@ -17,7 +19,7 @@ def restore_files(second_arg=None,third_arg=None,forth_arg=None, fifth_arg=None,
         try:
             fifth_arg = int(fifth_arg)
         except ValueError:
-            print("Invalid log ID. Please provide a valid integer.")
+            print(f"{colors.RED}Invalid log ID. Please provide a valid integer.{colors.RESET}")
             sys.exit(1)
 
     with open(dir/".track/index.json", "r") as index:
@@ -29,7 +31,7 @@ def restore_files(second_arg=None,third_arg=None,forth_arg=None, fifth_arg=None,
         indexed_file = find_file(file, files)
 
         if indexed_file == False:
-            print("File not found in the folder, check the file path, use a relative path if the file is in the current working directory or a subdirectory.")
+            print(f"{colors.RED}File not found in the folder, check the file path, use a relative path if the file is in the current working directory or a subdirectory.{colors.RESET}")
             sys.exit(1)
 
         file_id = indexed_file["id"]
@@ -40,7 +42,7 @@ def restore_files(second_arg=None,third_arg=None,forth_arg=None, fifth_arg=None,
 
         if forth_arg == None:
             if last_log_id == 0:
-                print("This is the original version of the file, no changes have been made yet.")
+                print(f"{colors.BLUE}This is the original version of the file, no changes have been made yet.{colors.RESET}")
                 sys.exit(0)
 
             with open(file_history/"PREVIOUS", "r") as prev_file:
@@ -51,7 +53,7 @@ def restore_files(second_arg=None,third_arg=None,forth_arg=None, fifth_arg=None,
                 fifth_arg = last_log_id
 
             if fifth_arg > last_log_id or fifth_arg < 1:
-                print(f"Invalid log ID. The last log ID for this file is {last_log_id}.")
+                print(f"{colors.RED}Invalid log ID. The last log ID for this file is {last_log_id}.{colors.RESET}")
                 sys.exit(1)
 
             with open(file_history/"ORIGIN", "r") as origin:
@@ -108,7 +110,7 @@ def find_file(file_path, files):
     path = Path(file_path)
 
     if path.is_absolute():
-        print("WARNING: Using absolute paths is discouraged.")
+        print(f"{colors.BLUE}WARNING: Using absolute paths is discouraged.{colors.RESET}")
         path = path.resolve()
 
         for file in files:

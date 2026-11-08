@@ -1,3 +1,4 @@
+import colors
 
 def init_history(i,file,track_path): 
     from pathlib import Path
@@ -23,9 +24,7 @@ def init_history(i,file,track_path):
     commit message
     previous datahash
     current datahash
-    added lines
-    removed lines
-    chnaged lines
+    changes made
     """
     
     with open(file,"r+") as open_file:
@@ -68,3 +67,44 @@ def create_delta_home(i,track_path):
     
     file_id = region["id"]
     Path.mkdir(Path.cwd()/f".track/history/{file_id}/deltas", exist_ok =True)
+    
+
+def file_history(second_arg,third_arg):
+    from pathlib import Path
+    import json
+    import sys
+    if second_arg == None or third_arg == None:
+        print(f"{colors.BLUE}Please provide the file path.{colors.RESET}")
+        sys.exit(1)
+    if second_arg not in ("-f", "--file"):
+        print(f"{colors.RED}Invalid option. Use -f or --file to specify a file.{colors.RESET}")
+        sys.exit(1)
+    if third_arg:
+        file = Path(third_arg)
+        if not Path.exists(file):
+            print(f"{colors.RED}File not found. Please provide a valid relative file path.{colors.RESET}")
+            sys.exit(1)
+        else:
+            track_path = Path.cwd() / ".track"
+            file = Path.cwd() / third_arg
+            with open(track_path/"index.json") as indexfile:
+                json_index = indexfile.read()
+                
+                index = json.loads(json_index)
+                files = index["files"]
+                #print(files)
+            if not str(file) in [f["path"] for f in files]:
+                print(f"{colors.BLUE}File not tracked, check the file path, use a relative path if the file is in the current working directory or a subdirectory or log the file to add to track index.{colors.RESET}")
+                sys.exit(1)
+            else:
+                for f in files:
+                    if f["path"] == str(file):
+                        history_file = track_path/f"history/{f['id']}/{f['id']}.tr"
+                        with open(history_file, "r") as history:
+                            history_content = history.read()
+                            print(history_content)
+
+
+
+
+

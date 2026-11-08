@@ -1,4 +1,6 @@
-
+import colors
+import sys
+sys.dont_write_bytecode = True
 from pathlib import Path
 import json
 import sys
@@ -49,7 +51,7 @@ def log_project():
                     shutil.rmtree(file_history_path)
 
                 index["files"].remove(file)
-                print(f"\n\nDELETED {f}\n\n")
+                print(f"{colors.RED}\n\nDELETED File: {f}{colors.RESET}\n\n")
 
         else:
             pass
@@ -61,7 +63,7 @@ def log_project():
         file["hash"] = hash_file(file["path"])
 
     for file in new_files:
-        print(f"{file}===NEW")
+        print(f"{file} ==> {colors.GREEN}NEW FILE DETECTED{colors.RESET}")
         index["files"] = append_index(file, index)
         update_index(index, index_path)
 
@@ -116,7 +118,7 @@ def scan_dir():
             continue
 
         if (
-            item.name in [".git", ".track", "not.track"]
+            item.name in [".git", ".track", "not.track", "__pycache__"]
             or item.name in ignore
             or relative_path in ignore
             or item.resolve() == Path(sys.executable).resolve()
@@ -186,7 +188,7 @@ def log_history(file, message, prev_hashes):
     print(f"\n{file['path']}:")
 
     if changes == False:
-        print("No Changes Detected. Edit/save file and retry.\n")
+        print(f"{colors.BLUE}No Changes Detected. Edit/save file and retry.\n{colors.RESET}")
         pass
 
     else:
